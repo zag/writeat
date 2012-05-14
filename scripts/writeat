@@ -1,0 +1,146 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Getopt::Long;
+use Pod::Usage;
+use v5.10;
+use Data::Dumper;
+use IO::File;
+use Writeat;
+use Perl6::Pod::Utl;
+use Perl6::Pod::Lib;
+
+my ( $help, $man );
+my ( $type, $package, $mode, $port ) = ( "perl5", 'MyApp::Tmpl', 'soy', 8080 );
+my %opt = (
+    help    => \$help,
+    man     => \$man,
+    type    => \$type,
+    package => \$package,
+    mode    => \$mode,
+    port    => \$port,
+);
+GetOptions( \%opt, 'help|?', 'man', 'c=s', "type|t:s", 'package|p=s',
+    'mode|m=s', 'port=s' )
+  or pod2usage(2);
+pod2usage(1) if $help;
+pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
+
+unless ($type) {
+    pod2usage( -exitstatus => 2, -message => 'Need valide -type !' );
+}
+
+if ( $type =~ /^perl/ and !$package ) {
+    pod2usage( -exitstatus => 2, -message => 'Need valide -package !' );
+}
+{
+    my $infile = shift;
+    my $in_fd;
+    if ($infile) {
+        $in_fd = new IO::File:: "< $infile" or die "$infile: $!";
+    }
+    else {
+        $in_fd = \*STDIN;
+    }
+    my $in;
+    { local $/; undef $/; $in = <$in_fd> };
+    my $tree = Perl6::Pod::Utl::parse_pod( $in, default_pod => 1 ) || die "Can't parse $infile";
+    my %res;
+    $tree = &Writeat::get_book_info_blocks( $tree, \%res );
+    my $r = new Writeat::To::DocBook::;
+    #set src key for path
+    $r->context->custom->{src} = $infile;
+    no strict 'refs';
+    my $pod6use = ${ "Perl6::Pod::Lib::POD6USE" };
+    if ($pod6use) {
+       while ( my ($k, $v ) = each %$pod6use) {
+        $r->context->use->{$k} = $v;
+       }
+    }
+    use strict 'refs';
+    $r->context->use->{CHANGES} = 'Writeat::CHANGES';
+    $r->context->use->{AUTHOR}  = 'Writeat::AUTHOR';
+
+    my $w = $r->writer();
+    my $dtd = '';
+    for (
+        '/usr/local/share/xml/docbook/4.5/docbookx.dtd',
+        '/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd'
+    ){
+        if (-e $_) {
+            $dtd = $_;
+            last;
+        }
+    }
+    die "Can't find docbookx.dtd file" unless $dtd;
+    $w->raw(<<"H");
+<?xml version='1.0' encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3CR1//EN"
+        "file://${dtd}" []>
+<book lang="ru">
+<bookinfo>
+H
+    for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
+        my $n = $res{$_} || die "Cant find block =$_";
+
+        #make Document element
+        $r->visit($n);
+    }
+    $r->w->raw('</bookinfo>');
+    $r->write($tree);
+    $r->end_write();
+    $w->raw('</book>');
+
+}
+
+exit 0;
+
+=head1 NAME
+
+  writeat  - process pod6 files
+
+=head1 SYNOPSIS
+
+  writeat -type docbook  -package MyApp::Tmpl file.po6 > file.xml
+
+   options:
+
+    -help  - print help message
+    -man   - print man page
+    
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-help>
+
+Print a brief help message and exit
+
+=item B<-man>
+
+Prints manual page and exit
+
+=back
+
+=head1 DESCRIPTION
+
+    writeat  - process pod6 files
+
+=head1 EXAMPLE
+
+   writeat  -package MyApp::Tmpl < file.pod6
+
+=head1 AUTHOR
+
+Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2012 by Zahatski Aliaksandr
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+

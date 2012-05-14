@@ -1,0 +1,23 @@
+use Module::Build;
+use v5.10;
+Module::Build->new
+    ( module_name => 'Writeat',
+    license => 'perl',
+   prereq => {
+	'Regexp::Grammars'=>1.015,
+        'Perl6::Pod::Lib'=>0.07,
+        'Perl6::Pod'=>0.51
+	     },
+    script_files=>[qw!
+	scripts/writeat
+    !],
+   dist_version_from=>'lib/Writeat.pm',
+    meta_merge=>{
+     resources=> {
+        repository => 'git://github.com/zag/p5-Writeat.git',
+        bugtracker=>'http://rt.cpan.org/Public/Dist/Display.html?Name=Writeat'
+    }
+    },
+   dist_author=>'Zahatski Aliaksandr zag@cpan.org',
+    create_makefile_pl=>$ENV{DO_OUTCPAN} ? 'traditional':'passthrough'
+    )->create_build_script;
