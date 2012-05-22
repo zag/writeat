@@ -16,6 +16,8 @@ use Perl6::Pod::Utl;
 use Data::Dumper;
 use Writeat;
 
+use_ok('Writeat');
+
 =head2 flat_pod $tree, &sub_ref( $node )
 
 =cut
