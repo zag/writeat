@@ -14,7 +14,7 @@ Module::Build->new
    dist_version_from=>'lib/Writeat.pm',
     meta_merge=>{
      resources=> {
-        repository => 'git://github.com/zag/p5-Writeat.git',
+        repository => 'git://github.com/zag/writeat.git',
         bugtracker=>'http://rt.cpan.org/Public/Dist/Display.html?Name=Writeat'
     }
     },
