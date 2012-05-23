@@ -12,8 +12,27 @@ Writeat - suite for make books and docs in pod6 format
 
 =head1 SYNOPSIS
 
-    writeat init 
-    make
+
+    =TITLE MyBook
+    =SUBTITLE My first free book
+    =AUTHOR
+    firstname:Alex
+    surname:Green
+    =DESCRIPTION  Short description about this book
+    =begin CHANGES
+    Aug 18th 2010(v0.2)[zag]   preface
+    
+    May 27th 2010(v0.1)[zag]   Initial version
+    =end CHANGES
+     
+    =Include src/book_preface.pod
+    =CHAPTER Intro
+    
+    B<Pod> is an evolution of Perl 5's L<I<Plain Ol' Documentation>|doc:perlpod>
+    (POD) markup. Compared to Perl 5 POD, Perldoc's Pod dialect is much more 
+    uniform, somewhat more compact, and considerably more expressive. The
+    Pod dialect also differs in that it is a purely descriptive mark-up
+    notation, with no presentational components.
 
 =head1 DESCRIPTION
 
@@ -68,7 +87,9 @@ __END__
 
 =head1 SEE ALSO
 
-Perl6::Pod
+Perl6::Pod,
+Russian book "Everything about Perl 6" L<https://github.com/zag/ru-perl6-book>
+
 
 =head1 AUTHOR
 
