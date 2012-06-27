@@ -11,7 +11,7 @@ use Perl6::Pod::Utl;
 use Perl6::Pod::Lib;
 
 my ( $help, $man );
-my ( $type, $package, $mode, $port ) = ( "perl5", 'MyApp::Tmpl', 'soy', 8080 );
+my ( $type, $package, $mode, $port, $lang ) = ( "perl5", 'MyApp::Tmpl', 'soy', 8080, 'en' );
 my %opt = (
     help    => \$help,
     man     => \$man,
@@ -19,9 +19,10 @@ my %opt = (
     package => \$package,
     mode    => \$mode,
     port    => \$port,
+    lang   => \$lang
 );
 GetOptions( \%opt, 'help|?', 'man', 'c=s', "type|t:s", 'package|p=s',
-    'mode|m=s', 'port=s' )
+    'mode|m=s', 'port=s', 'lang=s' )
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
@@ -77,7 +78,7 @@ if ( $type =~ /^perl/ and !$package ) {
 <?xml version='1.0' encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3CR1//EN"
         "file://${dtd}" []>
-<book lang="ru">
+<book lang="$lang">
 <bookinfo>
 H
     for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
