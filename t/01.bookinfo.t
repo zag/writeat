@@ -14,9 +14,9 @@ use v5.10;
 use Test::More tests => 1;                      # last test to print
 use Perl6::Pod::Utl;
 use Data::Dumper;
-use Writeat;
-
-use_ok('Writeat');
+use WriteAt;
+use utf8;
+use_ok('WriteAt');
 
 =head2 flat_pod $tree, &sub_ref( $node )
 
@@ -38,7 +38,7 @@ sub flat_pod {
 
 my $t = <<T;
 =begin pod
-=TITLE asdasd
+=ЗАГОЛОВОК asdasd
 =SUBTITLE asdasd
 =DESCRIPTION
 asd asd 
@@ -60,22 +60,13 @@ Ok
 =end pod
 T
 
-my %res = ();
-my $sub = sub {
-    my $res = shift;
-    return sub {
-    my $node = shift;
-    my $name = $node->name;
-    if ($name =~ /^(CHANGES|SUBTITLE|AUTHOR|TITLE|DESCRIPTION)$/) {
-       $res->{$name} = $node ;
-    #   warn $name;
-    }
-    return scalar( keys %{$res} ) == 5 # finish if we collect all headers
-    }
-};
+    utf8::decode( $t ) unless utf8::is_utf8( $t );
 
+my $tree = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 ) || die "Can't parse ";
+my %res = ();
+$tree = &WriteAt::get_book_info_blocks( $tree, \%res);
+#print Dumper \%res; exit;
 #warn $str;
-#diag Dumper \%res;
 
 
 

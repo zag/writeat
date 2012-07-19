@@ -1,4 +1,8 @@
-Revision history for Perl extension Writeat.
+Revision history for Perl extension WriteAt.
 
+0.02
+    + rename to WriteAt,
+    + add russian SEMANTIC blocks
+    + change =AUTHOR content
 0.01
-    + initial release of Writeat suite
+    + initial release of WriteAt suite

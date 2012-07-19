@@ -4,8 +4,7 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-#$Id$
-package Writeat::AUTHOR;
+package WriteAt::AUTHOR;
 use strict;
 use warnings;
 use Perl6::Pod::Block;
@@ -15,10 +14,10 @@ use base 'Perl6::Pod::Block';
 
 Convert:
 
-    *AUTHOR
-    firstname: Alex
-    surname: Bom
-    lineage: Bred
+    *AUTHOR firstname  [lineage ] surname 
+
+    *AUTHOR Alex Bred Bom 
+    *AUTHOR Alex Bom 
 
 To 
 
@@ -33,7 +32,13 @@ To
 sub parse_content {
     my $self     = shift;
     my $t        = shift;
-    my %items = $t=~m/^(\w+)\s*:\s*(.+?)\s*$/mg;
+    my @words = grep {defined $_ } $t=~m/^ \s* (\S+) \s+ (?:(\S+)\s+)? (\S+)/x;
+    my %items  = ();
+    if (scalar(@words) > 2 ) {
+    @items{qw/ firstname  lineage surname /} = @words;
+    }  else {
+    @items{qw/ firstname  surname /} = @words;
+    }
     return \%items;
 }
 

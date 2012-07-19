@@ -4,7 +4,7 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-package Writeat::CHANGES;
+package WriteAt::CHANGES;
 use strict;
 use warnings;
 use Perl6::Pod::Block;

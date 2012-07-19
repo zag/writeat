@@ -4,10 +4,11 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-package Writeat::To::DocBook;
+package WriteAt::To::DocBook;
 use Perl6::Pod::Utl;
-use Writeat::To;
-use base ('Perl6::Pod::To::DocBook', 'Writeat::To');
+use WriteAt::To;
+use base ('Perl6::Pod::To::DocBook', 'WriteAt::To');
+use utf8;
 
 sub block_DESCRIPTION {
     my ($self, $n) = @_;
@@ -32,6 +33,12 @@ sub block_SUBTITLE{
     $self->visit_childs($n);
     $w->raw('</subtitle>');
 };
+
+# alias for CHAPTER
+sub block_ГЛАВА {
+    $self = shift;
+    return $self->block_CHAPTER(@_)
+}
 
 
 sub block_CHAPTER {
