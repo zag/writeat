@@ -5,8 +5,8 @@ Module::Build->new
     license => 'perl',
    prereq => {
 	'Regexp::Grammars'=>1.015,
-        'Perl6::Pod::Lib'=>0.07,
-        'Perl6::Pod'=>0.54
+        'Perl6::Pod::Lib'=>0.11,
+        'Perl6::Pod'=>0.55
 	     },
     script_files=>[qw!
 	scripts/writeat

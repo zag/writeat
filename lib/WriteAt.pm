@@ -71,7 +71,7 @@ Point your web brouser to С<index.html> file in C<work> directory.
 use strict;
 use warnings;
 use v5.10;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 use WriteAt::CHANGES;
 use WriteAt::AUTHOR;
 use WriteAt::To::DocBook;
