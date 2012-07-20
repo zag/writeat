@@ -64,7 +64,7 @@ Grab template:
         cd writeat-tmpl-firstbook
         make
 
-Point your web brouser to С<index.html> file in C<work> directory.
+Point your web brouser to C<index.html> file in C<work> directory.
 
 =cut
 
