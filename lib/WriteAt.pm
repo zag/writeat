@@ -116,6 +116,9 @@ sub get_book_info_blocks {
         #convert =Include $n to DOM if To::* passed
         if ( $to && $n->name eq 'Include' ) {
             $n = $to->_make_dom_node($n);
+            #set current path
+            $to->context->custom->{src} = $n->{PATH};
+
         }
         if ( my $converted_block_name = &get_name_from_locale( $n->name ) ) {
             push @{$res->{$converted_block_name}}, $n;
