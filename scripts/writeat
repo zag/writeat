@@ -7,6 +7,7 @@ use v5.10;
 use Data::Dumper;
 use IO::File;
 use WriteAt;
+use WriteAt::To::Latex;
 use Perl6::Pod::Utl;
 use Perl6::Pod::Lib;
 
@@ -41,7 +42,9 @@ unless ($type) {
     utf8::decode($in) unless utf8::is_utf8($in);
     my $tree = Perl6::Pod::Utl::parse_pod( $in, default_pod => 1 )
       || die "Can't parse $infile";
-    my $r = new WriteAt::To::DocBook::;
+    #create driver instance
+    my $r = $type eq 'docbook' ? new WriteAt::To::DocBook:: lang=>$lang
+                               : new WriteAt::To::Latex:: lang=>$lang;
 
     #set src key for path
     $r->context->custom->{src} = $infile;
@@ -57,27 +60,12 @@ unless ($type) {
     $r->context->use->{AUTHOR}  = 'WriteAt::AUTHOR';
 
     my $w   = $r->writer();
-    my $dtd = '';
-    for (
-        '/usr/local/share/xml/docbook/4.5/docbookx.dtd',
-        '/usr/share/xml/docbook/schema/dtd/4.5/docbookx.dtd'
-      )
-    {
-        if ( -e $_ ) {
-            $dtd = $_;
-            last;
-        }
-    }
-    die "Can't find docbookx.dtd file" unless $dtd;
-    $w->raw(<<"H");
-<?xml version='1.0' encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3CR1//EN"
-        "file://${dtd}" []>
-<book lang="$lang">
-<bookinfo>
-H
+    $r->start_write();
     my %res;
     $tree = &WriteAt::get_book_info_blocks( $tree, \%res, $r );
+
+  if ( $type eq 'docbook' ) {
+    $r->w->raw('<bookinfo>');
     for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
         my $n = $res{$_} || die "Cant find block =$_";
 
@@ -85,9 +73,22 @@ H
         $r->visit($n);
     }
     $r->w->raw('</bookinfo>');
+    } elsif ($type eq 'latex') {
+
+    
+    $r->title_page( %res );
+    $r->w->raw('\tableofcontents{} % это оглавление, которое генерируется автоматически
+\newpage');
+#    for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
+#        my $n = $res{$_} || die "Cant find block =$_";
+#
+#        #make Document element
+#        $r->visit($n);
+#    }
+    }
+
     $r->write($tree);
     $r->end_write();
-    $w->raw('</book>');
 
 }
 
