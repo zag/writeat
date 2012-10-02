@@ -139,7 +139,7 @@ $self->w->raw('
 \vspace{\fill}
 
 \begin{center}
-WriteAt
+\[ WriteAt \]
 \end{center}
 
 \end{titlepage}');
