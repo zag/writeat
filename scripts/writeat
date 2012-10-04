@@ -11,15 +11,16 @@ use WriteAt::To::Latex;
 use Perl6::Pod::Utl;
 use Perl6::Pod::Lib;
 
-my ( $help, $man );
+my ( $help, $man, $render_class );
 my ( $type, $lang ) = ( "docbook", 'en' );
 my %opt = (
-    help => \$help,
-    man  => \$man,
-    type => \$type,
-    lang => \$lang
+    help   => \$help,
+    man    => \$man,
+    type   => \$type,
+    lang   => \$lang,
+    render => \$render_class
 );
-GetOptions( \%opt, 'help|?', 'man', 'c=s', "type|t:s", 'lang=s' )
+GetOptions( \%opt, 'help|?', 'man', 'c=s', "type|t:s", 'lang=s', 'render|r:s' )
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
@@ -42,15 +43,35 @@ unless ($type) {
     utf8::decode($in) unless utf8::is_utf8($in);
     my $tree = Perl6::Pod::Utl::parse_pod( $in, default_pod => 1 )
       || die "Can't parse $infile";
+
     #create driver instance
-    my $r = $type eq 'docbook' ? new WriteAt::To::DocBook:: lang=>$lang
-                               : new WriteAt::To::Latex:: lang=>$lang;
+    #preload render class
+
+    my $class =
+      $type eq 'docbook'
+      ? 'WriteAt::To::DocBook'
+      : 'WriteAt::To::Latex';
+    if ($render_class) {
+        $class = $render_class;
+        eval "use $class";
+        if ($@) {
+            use Carp;
+            croak "Error register class :$class with $@ ";
+            return 0;
+        }
+
+    }
+    my $r = $class->new( lang => $lang );
 
     #set src key for path
     $r->context->custom->{src} = $infile;
     no strict 'refs';
-    my $pod6use = ${"Perl6::Pod::Lib::POD6USE"};
-    if ($pod6use) {
+
+    #add plugins
+    foreach
+      my $pod6use ( ${"Perl6::Pod::Lib::POD6USE"}, ${"${class}::POD6USE"} )
+    {
+        next unless ref($pod6use);
         while ( my ( $k, $v ) = each %$pod6use ) {
             $r->context->use->{$k} = $v;
         }
@@ -59,32 +80,35 @@ unless ($type) {
     $r->context->use->{CHANGES} = 'WriteAt::CHANGES';
     $r->context->use->{AUTHOR}  = 'WriteAt::AUTHOR';
 
-    my $w   = $r->writer();
+    my $w = $r->writer();
     $r->start_write();
     my %res;
     $tree = &WriteAt::get_book_info_blocks( $tree, \%res, $r );
 
-  if ( $type eq 'docbook' ) {
-    $r->w->raw('<bookinfo>');
-    for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
-        my $n = $res{$_} || die "Cant find block =$_";
+    if ( $type eq 'docbook' ) {
+        $r->w->raw('<bookinfo>');
+        for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
+            my $n = $res{$_} || die "Cant find block =$_";
 
-        #make Document element
-        $r->visit($n);
+            #make Document element
+            $r->visit($n);
+        }
+        $r->w->raw('</bookinfo>');
     }
-    $r->w->raw('</bookinfo>');
-    } elsif ($type eq 'latex') {
+    elsif ( $type eq 'latex' ) {
 
-    
-    $r->title_page( %res );
-    $r->w->raw('\tableofcontents{} % это оглавление, которое генерируется автоматически
-\newpage');
-#    for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
-#        my $n = $res{$_} || die "Cant find block =$_";
-#
-#        #make Document element
-#        $r->visit($n);
-#    }
+        $r->title_page(%res);
+        $r->w->raw(
+'\tableofcontents{} % это оглавление, которое генерируется автоматически
+\newpage'
+        );
+
+        #    for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
+        #        my $n = $res{$_} || die "Cant find block =$_";
+        #
+        #        #make Document element
+        #        $r->visit($n);
+        #    }
     }
 
     $r->write($tree);
@@ -106,6 +130,9 @@ exit 0;
 
     -help  - print help message
     -man   - print man page
+    -type  - output format
+    -render,-r - use class for render (-type ignored)
+    -lang  - set language ( default: en )
     
 
 =head1 OPTIONS
@@ -119,6 +146,10 @@ Print a brief help message and exit
 =item B<-man>
 
 Prints manual page and exit
+
+=item B<-render>, B<-r> class
+
+use class for render (C<-type> ignored)
 
 =back
 
