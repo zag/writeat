@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use Perl6::Pod::Utl;
 use WriteAt::To;
-use base ( 'Perl6::Pod::To::DocBook', 'WriteAt::To' );
+use base ( 'Perl6::Pod::To::Latex', 'WriteAt::To' );
 use utf8;
 
 sub start_write {
