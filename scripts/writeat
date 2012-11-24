@@ -59,7 +59,6 @@ unless ($type) {
             croak "Error register class :$class with $@ ";
             return 0;
         }
-
     }
     my $r = $class->new( lang => $lang );
 
@@ -130,8 +129,8 @@ exit 0;
 
     -help  - print help message
     -man   - print man page
-    -type  - output format
-    -render,-r - use class for render (-type ignored)
+    -type  - output format (docbook, latex, atom)
+    -render,-r - use class for render (option -type ignored)
     -lang  - set language ( default: en )
     
 
