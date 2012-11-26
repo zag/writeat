@@ -10,7 +10,14 @@ use WriteAt;
 use WriteAt::To::Latex;
 use Perl6::Pod::Utl;
 use Perl6::Pod::Lib;
+use constant {
+    TYPE2CLASS => {
+        docbook => 'WriteAt::To::DocBook',
+        latex   => 'WriteAt::To::Latex',
+        atom    => 'WriteAt::To::Atom'
+      }
 
+};
 my ( $help, $man, $render_class );
 my ( $type, $lang ) = ( "docbook", 'en' );
 my %opt = (
@@ -47,10 +54,8 @@ unless ($type) {
     #create driver instance
     #preload render class
 
-    my $class =
-      $type eq 'docbook'
-      ? 'WriteAt::To::DocBook'
-      : 'WriteAt::To::Latex';
+    my $class = TYPE2CLASS->{$type} || 'WriteAt::To::DocBook';
+
     if ($render_class) {
         $class = $render_class;
         eval "use $class";
@@ -60,7 +65,23 @@ unless ($type) {
             return 0;
         }
     }
-    my $r = $class->new( lang => $lang );
+
+    my %ini;
+
+    my $tag = shift;
+    foreach (@ARGV) {
+        #clean opts
+        my @opt = split( /\s*\,\s*/, $_ );
+        if ( $opt[0] =~ /^-(\S+)/ ) {
+            shift @ini;
+            $tag = $1;
+        }
+        next unless defined $tag;
+        push @{ $ini{$tag} }, @opt;
+
+    }
+
+    my $r = $class->new( lang => $lang, %ini );
 
     #set src key for path
     $r->context->custom->{src} = $infile;
