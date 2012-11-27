@@ -133,7 +133,80 @@ sub get_book_info_blocks {
     \@tree;
 }
 
+=pod
+ {
+    =tagname
+    =childs
+ }
+
+=cut
+
+sub get_childs {
+    my ( $name, $level, $tree ) = @_;
+    my @childs = ();
+    while ( my $current = shift @$tree ) {
+        my $cname  = $current->name;
+        my $clevel = $current->{level};
+
+        #set level 0 for semantic blocks
+        $clevel = 0 if $cname eq uc($cname);
+
+        if (
+            ( defined($clevel) and ( $clevel < $level ) )
+            || (   ( $cname eq $name )
+                && ( $level == $clevel ) )
+
+           )
+        {
+            unshift @$tree, $current;
+            return @childs;
+        }
+        push @childs, $current;
+    }
+    return @childs;
+}
+
+=head2 make_levels ( blockname, level, $parsed_tree )
+
+Make tree using levels
+
+    my $tree = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 )
+        || die "Can't parse ";
+    my ($root) = @$tree;
+    my $tree1 = $tree;
+    if ( $root->name eq 'pod' ) {
+        $tree1 = $root->childs;
+    }
+    
+    my $levels = &WriteAt::make_levels( "CHAPTER", 0, $tree1 );
+
+=cut
+
+sub make_levels {
+    my ( $name, $level, $tree ) = @_;
+    my @res = ();
+    while ( my $current = shift @$tree ) {
+        next unless $current->name eq $name;
+        my $clevel = $current->{level};
+        my $cname  = $current->name;
+
+        #set level 0 for semantic blocks
+        $clevel = 0 if $cname eq uc($cname);
+
+        if ( defined($clevel) ) {
+            next unless $clevel == $level;
+        }
+        push @res,
+          {
+            node   => $current,
+            childs => [ &get_childs( $name, $level, $tree ) ]
+          };
+    }
+    return \@res;
+}
+
 =head1 METHODS
+
 =cut
 
 sub new {

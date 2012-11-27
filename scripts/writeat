@@ -68,6 +68,7 @@ unless ($type) {
 
     my %ini;
 
+    # process params after -- 
     my $tag = shift;
     foreach (@ARGV) {
         #clean opts
@@ -100,10 +101,10 @@ unless ($type) {
     $r->context->use->{CHANGES} = 'WriteAt::CHANGES';
     $r->context->use->{AUTHOR}  = 'WriteAt::AUTHOR';
 
-    my $w = $r->writer();
-    $r->start_write();
     my %res;
     $tree = &WriteAt::get_book_info_blocks( $tree, \%res, $r );
+
+    $r->start_write(%res);
 
     if ( $type eq 'docbook' ) {
         $r->w->raw('<bookinfo>');
