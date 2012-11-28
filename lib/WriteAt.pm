@@ -116,12 +116,14 @@ sub get_book_info_blocks {
         #convert =Include $n to DOM if To::* passed
         if ( $to && $n->name eq 'Include' ) {
             $n = $to->_make_dom_node($n);
+
             #set current path
             $to->context->custom->{src} = $n->{PATH};
 
         }
         if ( my $converted_block_name = &get_name_from_locale( $n->name ) ) {
-            push @{$res->{$converted_block_name}}, $n;
+            push @{ $res->{$converted_block_name} }, $n;
+
             # overwrite original name
             $n->{name} = $converted_block_name;
         }
@@ -134,6 +136,7 @@ sub get_book_info_blocks {
 }
 
 =pod
+
  {
     =tagname
     =childs
@@ -180,10 +183,28 @@ Make tree using levels
     
     my $levels = &WriteAt::make_levels( "CHAPTER", 0, $tree1 );
 
+    return 
+
+    [
+        {
+            node => {ref to object},
+            childs => [ array of childs]
+        
+        },
+        ...
+    ]
 =cut
 
 sub make_levels {
     my ( $name, $level, $tree ) = @_;
+
+    #check if root node pod
+    # call for childs
+    if ( my $first = $tree->[0] ) {
+        return &make_levels( $name, $level, $first->childs )
+          if $first->name eq 'pod';
+    }
+
     my @res = ();
     while ( my $current = shift @$tree ) {
         next unless $current->name eq $name;
@@ -203,6 +224,27 @@ sub make_levels {
           };
     }
     return \@res;
+}
+
+=head2 get_text(node1, node2, ...)
+
+return string of all childs texts nodes
+
+=cut
+
+sub get_text {
+    my @nodes = @_;
+    my $txt   = '';
+    foreach my $n (@nodes) {
+        if ( $n->{type} eq 'text' ) {
+            $txt .= join "" => @{ $n->childs };
+        }
+        else {
+            $txt .= &get_text( @{ $n->childs } );
+        }
+    }
+    chomp($txt);
+    return $txt;
 }
 
 =head1 METHODS
