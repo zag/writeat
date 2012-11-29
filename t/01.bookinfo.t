@@ -65,12 +65,6 @@ $tree = &WriteAt::get_book_info_blocks( $tree, \%res );
 my $res = &WriteAt::make_levels( "CHAPTER", 0, $tree );
 is scalar(@$res), 2 , 'Get semantic nodes';
 is &WriteAt::get_text($res->[0]->{node}), 'Test chapter', 'get text content of node';
-#print Dumper $res->[0]->{node};
-#use Perl6::Pod::Test;
-#my $dump = &Perl6::Pod::Test::dump_tree($result);
-#print Dumper $result;
-
-exit;
 
 use_ok "WriteAt::To::Atom";
 my $atom = new WriteAt::To::Atom:: lang => 'en';
