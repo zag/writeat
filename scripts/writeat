@@ -74,7 +74,7 @@ unless ($type) {
         #clean opts
         my @opt = split( /\s*\,\s*/, $_ );
         if ( $opt[0] =~ /^-(\S+)/ ) {
-            shift @ini;
+            shift @opt;
             $tag = $1;
         }
         next unless defined $tag;
