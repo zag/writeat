@@ -30,9 +30,7 @@ May 13th 2011(v0.6)[zag]   Формат Pod
 Jan 08th 2011(v0.5)[zag]   Подпрограммы и сигнатуры
 
 =end CHANGES
-=for AUTHOR
-firstname: Александр
-surname: Загацкий
+=AUTHOR Александр Загацкий
 
 =CHAPTER Test chapter
 
@@ -66,11 +64,17 @@ my $res = &WriteAt::make_levels( "CHAPTER", 0, $tree );
 is scalar(@$res), 2 , 'Get semantic nodes';
 is &WriteAt::get_text($res->[0]->{node}), 'Test chapter', 'get text content of node';
 
+my %res2 = ();
+my $tree2 = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 )
+  || die "Can't parse ";
+$tree2 = &WriteAt::get_book_info_blocks( $tree2, \%res2 );
+#diag Dumper $res->[0];
 use_ok "WriteAt::To::Atom";
 my $atom = new WriteAt::To::Atom:: lang => 'en';
+
 diag $atom->writer;
-$atom->start_write(%res);
-$atom->write();
+$atom->start_write(%res2);
+$atom->write($tree2);
 $atom->end_write();
 
 #$atom
