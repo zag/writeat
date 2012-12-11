@@ -6,7 +6,8 @@ Module::Build->new
    prereq => {
 	'Regexp::Grammars'=>1.015,
         'Perl6::Pod::Lib'=>0.11,
-        'Perl6::Pod'=>0.55
+        'Perl6::Pod'=>0.55,
+        'DateTime::Format::W3CDTF'=>0
 	     },
     script_files=>[qw!
 	scripts/writeat

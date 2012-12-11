@@ -10,6 +10,7 @@ use WriteAt;
 use WriteAt::To::Latex;
 use Perl6::Pod::Utl;
 use Perl6::Pod::Lib;
+use WriteAt::To::Atom;
 use constant {
     TYPE2CLASS => {
         docbook => 'WriteAt::To::DocBook',
@@ -81,8 +82,15 @@ unless ($type) {
         push @{ $ini{$tag} }, @opt;
 
     }
-
-    my $r = $class->new( lang => $lang, %ini );
+    #clear -baseurl -> baseurl
+    # baseurl => ['http://example.com'] -> baseurl=>'http://example.com'
+    my %opt = ();
+    while ( my ($k, $v ) = each %ini ) {
+        $k =~ s/^-+//;
+        $opt{$k} = scalar(@$v) > 1 ? $v : $v->[0] ;
+        
+    }
+    my $r = $class->new( lang => $lang, %opt );
 
     #set src key for path
     $r->context->custom->{src} = $infile;
@@ -146,15 +154,35 @@ exit 0;
 =head1 SYNOPSIS
 
   writeat -type docbook  file.pod6 > file.xml
+ 
+or
+  writeat [options] [file] -- [render oprions]
+  
 
-   options:
+   [options]:
 
     -help  - print help message
     -man   - print man page
     -type  - output format (docbook, latex, atom)
     -render,-r - use class for render (option -type ignored)
     -lang  - set language ( default: en )
-    
+
+    [file] : filename or - for STDIN
+
+    [render options]:
+     atom:
+            -baseurl http://example.org  - base url for links
+            -default_publish 1 - publish items without 'published' attr
+                                 default: 0.
+            -set_date '2012-11-27T09:39:18Z' - set time to filter published
+
+      atom example:
+
+    writeat -t atom -lang en - \
+        -- -baseurl http://example.org \
+        -default_publish 0 \
+        -set_date '2012-11-27T09:39:18Z' < exportatom.pod6
+
 
 =head1 OPTIONS
 

@@ -32,7 +32,8 @@ Jan 08th 2011(v0.5)[zag]   Подпрограммы и сигнатуры
 =end CHANGES
 =AUTHOR Александр Загацкий
 
-=CHAPTER Test chapter
+=for CHAPTER :published<'2012-11-27T09:39:19Z'>
+Test chapter
 
 Ok 
 =head1 Test name
@@ -61,21 +62,45 @@ $tree = &WriteAt::get_book_info_blocks( $tree, \%res );
 
 #print Dumper $tree; exit;
 my $res = &WriteAt::make_levels( "CHAPTER", 0, $tree );
-is scalar(@$res), 2 , 'Get semantic nodes';
-is &WriteAt::get_text($res->[0]->{node}), 'Test chapter', 'get text content of node';
+is scalar(@$res), 2, 'Get semantic nodes';
+is &WriteAt::get_text( $res->[0]->{node} ), 'Test chapter',
+  'get text content of node';
 
 my %res2 = ();
 my $tree2 = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 )
   || die "Can't parse ";
 $tree2 = &WriteAt::get_book_info_blocks( $tree2, \%res2 );
-#diag Dumper $res->[0];
-use_ok "WriteAt::To::Atom";
-my $atom = new WriteAt::To::Atom:: lang => 'en';
 
-diag $atom->writer;
+use_ok "WriteAt::To::Atom";
+
+my $out = '';
+open( my $fd, ">", \$out );
+
+my $atom = new WriteAt::To::Atom::
+  lang              => 'en',
+  default_published => 0,
+  set_date          => '2012-12-15T13:00:00Z',
+  writer            => new Perl6::Pod::Writer( out => $fd, escape => 'xml' );
+
+is my $utc = $atom->get_time_stamp_from_string('2003-02-15T13:00:00Z'),
+  $atom->get_time_stamp_from_string('2003-02-15T12:00:00-01:00'),
+  "Get timestams";
+is $utc, $atom->get_time_stamp_from_string('2003-02-15 13:00'),
+  "2003-02-15 13:00";
+is $utc, $atom->get_time_stamp_from_string('2003-02-15 13'), "2003-02-15 13";
+is $atom->get_time_stamp_from_string('2003-02-15T00:00:00Z'),
+  $atom->get_time_stamp_from_string('2003-02-15'),
+  "2003-02-15";
+
+is $atom->unixtime_to_string(
+    $atom->get_time_stamp_from_string('2003-01-15T06:00:00-02:00') ),
+  '2003-01-15T08:00:00Z', 'unixtime_to_string';
+
 $atom->start_write(%res2);
 $atom->write($tree2);
 $atom->end_write();
+close $fd;
+is scalar( @{ [ $out =~ /(<\/entry>)/gs ] } ), 1, 'default_published';
 
 #$atom
 #print Dumper \%res; exit;

@@ -21,7 +21,7 @@ sub start_write {
 \usepackage[utf8]{inputenc}%включаем свою кодировку: koi8-r или utf8 в UNIX, cp1251 в Windows
 \usepackage[english,russian]{babel}%используем русский и английский языки с переносами
 \usepackage{amssymb,amsfonts,amsmath,mathtext,cite,enumerate,float} %подключаем нужные пакеты расширений
-\usepackage[dvips]{graphicx} %хотим вставлять в диплом рисунки?
+\usepackage[dvips]{graphicx} %хотим вставлять рисунки?
 \graphicspath{{images/}}%путь к рисункам
 \newcommand{\tocsecindent}{\hspace{7mm}}
 \usepackage{makeidx}
@@ -82,8 +82,6 @@ sub block_CHAPTER {
 
 sub block_para {
     my ( $self, $el ) = @_;
-
-    #    $self->w->raw()
     $self->visit( Perl6::Pod::Utl::parse_para( $el->childs->[0] ) );
 
 }
