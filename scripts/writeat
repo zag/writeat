@@ -128,7 +128,7 @@ unless ($type) {
 
         $r->title_page(%res);
         $r->w->raw(
-'\tableofcontents{} % это оглавление, которое генерируется автоматически
+'\tableofcontents{} % auto toc
 \newpage'
         );
 
