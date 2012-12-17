@@ -115,7 +115,7 @@ sub start_write {
     my $atomid       = "tag:$base_url, 2012:1";
     my $updated_time = $self->unixtime_to_string( time() );
     $w->raw(<<TXT);
-   <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
   <feed xmlns="http://www.w3.org/2005/Atom">
   <title>$title</title>
   <id>$atomid</id>

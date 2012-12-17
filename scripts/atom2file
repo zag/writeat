@@ -6,13 +6,15 @@ use Pod::Usage;
 use v5.10;
 use Data::Dumper;
 use IO::File;
-my ( $help, $man, $template );
+use XML::Flow;
+my ( $help, $man, $template, $prefix );
 my %opt = (
     help   => \$help,
     man    => \$man,
     template   => \$template,
+    prefix => \$prefix
 );
-GetOptions( \%opt, 'help|?', 'man', "template|t:s" )
+GetOptions( \%opt, 'help|?', 'man', "template|t:s", "prefix|p:s" )
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
@@ -20,6 +22,10 @@ pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 unless ($template) {
     pod2usage( -exitstatus => 2, -message => 'Need -template [file]!' );
 }
+unless (-e $template) {
+    pod2usage( -exitstatus => 2, -message => "Not exists template: $template" );
+}
+
 
 {
     my $infile = shift;
@@ -30,9 +36,71 @@ unless ($template) {
     else {
         $in_fd = \*STDIN;
     }
-    my $in;
-    { local $/; undef $/; $in = <$in_fd> };
+#    my $in;
+#    { local $/; undef $/; $in = <$in_fd> };
 }
+
+=head2  parse_feed \*STDIN, sub handler {}
+
+=cut
+
+sub parse_feed {
+    my ( $data, $sub_ref ) = @_;
+    my $rd   = new XML::Flow:: $data;
+    my %tags = (
+        entry => sub {
+            shift;
+            if ($sub_ref) { $sub_ref->(@_) }
+            else { print "Item:" . Dumper( {@_} ) }
+        },
+     'content' => sub{
+            my $attr = shift;
+            return content=>join "", @_;
+     },
+     'link' => sub { my $attr = shift; return ('link'=>$attr)},
+     '*' => sub { my ($name, $attr, @text) = @_;  return $name =>  join "", @text},
+    );
+    $rd->read( \%tags );
+    $rd->close;
+}
+
+my $source = \*STDIN;
+my $i      = 0;
+my @nodes    = ();
+&parse_feed(
+    $source,
+    sub {
+        my %record = @_;
+        push @nodes, \%record;
+    }
+);
+# setup next and previus keys
+my $size = @nodes;
+for (my $i = 0; $i < $size; $i++) {
+    my $n = $nodes[$i];
+    $n->{prev} = $nodes[$i] if $i;
+    $n->{next} = $nodes[$i+1] if $i < ($size-1);
+}
+
+#call template
+foreach my $node (@nodes ) {
+     my $file_name = $node->{link}->{href} or die "Can't read link's href: id= $node->{id}";
+     $file_name =~ s%.+//[^/]+/%%;
+     $file_name = "$prefix/$file_name" if $prefix;
+     use Template;
+     my $tt = Template->new({INTERPOLATE  => 0, ABSOLUTE=>1});
+     #process input template, substituting variables
+      $tt->process($template, $node, $file_name)
+         || die $tt->error();
+
+}
+#use Data::Dumper;
+#print Dumper(\@nodes);
+
+#stop 
+
+
+1;
 
 =head1 NAME
 
@@ -47,7 +115,29 @@ unless ($template) {
 
     -help  - print help message
     -man   - print man page
+    -template file - TT2 template file
+    -prefix path - directory path for store files to
 
+=head1 TEMPLATE
+
+Template call with the following keys for each atom entry:
+
+          {
+            'published' => '2012-11-27T09:39:19Z',
+            'link' => {
+                        'rel' => 'alternate',
+                        'href' => 'http://example.com/Test-chapter.htm',
+                        'type' => 'text/html',
+                        'title' => 'Test chapter'
+                      },
+            'content' => 'HTML text',
+            'updated' => '2012-12-17T13:29:08Z',
+            'id' => 'http://example.com;Test chapter',
+            'title' => 'Test chapter'
+            'next' =>{ next atom node},
+            'prev' =>{ previus atom node}
+
+          }
 
 =head1 OPTIONS
 

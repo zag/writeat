@@ -60,8 +60,9 @@ my $tree = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 )
 my %res = ();
 $tree = &WriteAt::get_book_info_blocks( $tree, \%res );
 
-#print Dumper $tree; exit;
 my $res = &WriteAt::make_levels( "CHAPTER", 0, $tree );
+print Dumper $res; exit;
+
 is scalar(@$res), 2, 'Get semantic nodes';
 is &WriteAt::get_text( $res->[0]->{node} ), 'Test chapter',
   'get text content of node';
