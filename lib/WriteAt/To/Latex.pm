@@ -9,6 +9,7 @@ use strict;
 use warnings;
 use Perl6::Pod::Utl;
 use WriteAt::To;
+use Perl6::Pod::To::Latex;
 use base ( 'Perl6::Pod::To::Latex', 'WriteAt::To' );
 use utf8;
 

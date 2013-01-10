@@ -26,4 +26,8 @@ ok
 Ok 
 =head1 Teste
 
+=CHAPTER chapter3
+
+Test
+
 =end pod

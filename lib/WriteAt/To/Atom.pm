@@ -134,16 +134,22 @@ sub write {
     my $tree = shift;
     my $res  = &WriteAt::make_levels( "CHAPTER", 0, $tree );
     my $w    = $self->writer;
-    foreach my $entry (@$res) {
 
-        # check if need filter by published
+    #first setup published attr for items
+    # if default_published
+    my $current_time =
+        $self->{set_date}
+      ? $self->get_time_stamp_from_string( $self->{set_date} )
+      : time();
+    my @items_to_publish = ();
+    my $order            = 0;
+    foreach my $entry (@$res) {
+        $entry->{order} = ++$order;    #for sort in later
         my $published = $entry->{node}->get_attr->{published};
-        my $current_time = $self->{set_date} ?
-          $self->get_time_stamp_from_string( $self->{set_date} ) : time();
-        #if strict check published attr
-        unless ( $self->{default_published} ) {
+        unless ($published) {
+
             #skip enties without published attr
-            next unless $published;
+            next unless $self->{default_published};
         }
 
         #set default publushed = current time
@@ -153,14 +159,27 @@ sub write {
           : $current_time;
 
         #skip entry in future
-        next if  $published_time > $current_time;
+        next if $published_time > $current_time;
 
-        my $updated = $self->unixtime_to_string( time() );
+        #save publish timesamp for sorting later
+        $entry->{pub_time} = $published_time;
+        push @items_to_publish, $entry;
+    }
+
+    #sort entries
+    @items_to_publish =
+      sort { $b->{pub_time} <=> $a->{pub_time} || $b->{order} <=> $a->{order} }
+      @items_to_publish;
+    foreach my $entry (@items_to_publish) {
+
+        # check if need filter by published
+        my $published = $entry->{node}->get_attr->{published};
+        my $updated   = $self->unixtime_to_string($current_time);
         $published ||= $updated;
         my $title    = &WriteAt::get_text( $entry->{node} );
         my $title_en = &WriteAt::rus2lat($title);
 
-        #clear spaces
+        #strip spaces
         $title_en =~ s/\s+/-/g;
         my $filename = $title_en . ".htm";
         my $url      = $self->{baseurl} . "/" . $filename;

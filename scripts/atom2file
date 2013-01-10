@@ -78,7 +78,7 @@ my @nodes  = ();
 );
 
 # setup next and previus keys
-my $size = @nodes;
+my $size = reverse @nodes;
 for ( my $i = 0 ; $i < $size ; $i++ ) {
     my $n = $nodes[$i];
     $n->{prev} = $nodes[$i] if $i;
