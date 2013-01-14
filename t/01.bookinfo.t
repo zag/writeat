@@ -9,7 +9,7 @@ package main;
 use strict;
 use warnings;
 use v5.10;
-use Test::More tests => 1;    # last test to print
+use Test::More tests => 13;    # last test to print
 use Perl6::Pod::Utl;
 use Data::Dumper;
 use WriteAt;
@@ -32,7 +32,7 @@ Jan 08th 2011(v0.5)[zag]   Подпрограммы и сигнатуры
 =end CHANGES
 =AUTHOR Александр Загацкий
 
-=for CHAPTER :published<'2012-11-27T09:39:19Z'>
+=for CHAPTER :published<'2012-11-27T09:39:19Z'> :tag<intro>
 Test chapter
 
 Ok 
@@ -78,7 +78,6 @@ my %res2 = ();
 my $tree2 = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 )
   || die "Can't parse ";
 $tree2 = &WriteAt::get_book_info_blocks( $tree2, \%res2 );
-
 use_ok "WriteAt::To::Atom";
 
 my $out = '';
@@ -109,9 +108,7 @@ $atom->write($tree2);
 $atom->end_write();
 close $fd;
 is scalar( @{ [ $out =~ /(<\/entry>)/gs ] } ), 1, 'default_published';
-
-#$atom
-#print Dumper \%res; exit;
-#print Dumper $tree;
-#warn $str;
+#test DESCRIPTION :tag
+ok $out =~ m%<category>pod6</category>%, '=for DESCRITION :tag<pod6>';
+ok $out =~ m%<category>intro</category>%, '=for CHAPTER :tag<intro>';
 

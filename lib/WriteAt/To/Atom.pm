@@ -127,6 +127,18 @@ sub start_write {
     <uri>$base_url</uri>
   </author>
 TXT
+  # add category if tag exists
+  if ( my $desc_node = $tags{DESCRIPTION}->[0] ) {
+    if ( my $tags = $desc_node->get_attr()->{tag} ) {
+        # save TAGS as ref to array 
+        $self->{TAGS} = ref($tags) ? $tags : [$tags];
+        #fill categoty tags
+        foreach my $tag ( @{$self->{TAGS}} ) {
+            $w->raw("<category>$tag</category>\n")
+            
+        }
+    }
+  }
 }
 
 sub write {
@@ -191,8 +203,17 @@ sub write {
                  <link rel="alternate" href="$url" title="$title" type="text/html"/>
                 <published>$published</published>
                 <updated>$updated</updated>
-                 <content type="html">%
+                %
         );
+        if ( my $tags = $entry->{node}->get_attr->{tag} ) {
+            # save TAGS as ref to array 
+            my $local_tags = ref($tags) ? $tags : [$tags];
+            #union tags fill categoty tags
+            foreach my $tag ( @{$local_tags}, @{ $self->{TAGS}|| [] } ) {
+                $w->raw("<category>$tag</category>\n")
+            }
+        }
+
         my $out = '';
         open( my $fd, ">", \$out );
         my $renderer = new Perl6::Pod::To::XHTML::
@@ -211,6 +232,7 @@ sub write {
         }
         close $fd;
         my $safe_text = &Perl6::Pod::Writer::_html_escape($out);
+        $w->raw('<content type="html">');
         $w->raw($safe_text);
         $w->raw(
             '</content>
