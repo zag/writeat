@@ -20,7 +20,7 @@ my $t = <<T;
 =begin pod
 =ЗАГОЛОВОК asdasd
 =SUBTITLE asdasd
-=DESCRIPTION
+=for DESCRIPTION :tag<tag pod6 test>
 asd asd 
 =begin CHANGES
 Sep 19th 2011(v0.7)[zag]   Классы и объекты
@@ -59,9 +59,16 @@ my $tree = Perl6::Pod::Utl::parse_pod( $t, default_pod => 1 )
   || die "Can't parse ";
 my %res = ();
 $tree = &WriteAt::get_book_info_blocks( $tree, \%res );
+my ($DESCR) = @{ $res{DESCRIPTION} };
+is_deeply $DESCR->get_attr(), {
+          'tag' => [
+                   'tag',
+                   'pod6',
+                   'test'
+                 ]
+        }, 'check tag attr';
 
 my $res = &WriteAt::make_levels( "CHAPTER", 0, $tree );
-print Dumper $res; exit;
 
 is scalar(@$res), 2, 'Get semantic nodes';
 is &WriteAt::get_text( $res->[0]->{node} ), 'Test chapter',
