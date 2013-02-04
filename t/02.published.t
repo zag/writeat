@@ -20,7 +20,6 @@ my $t = <<T;
 =for CHAPTER :published<'2012-11-27T09:39:19Z'> :tag<intro>
 Test chapter
 =head1 Test name
-
 test
 =head2 test
 
