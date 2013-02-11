@@ -72,7 +72,7 @@ use strict;
 sub block_CHAPTER {
     my ( $self, $node ) = @_;
     #close any section
-    $self->switch_head_level(0);
+    $self->switch_head_level(0, 'no_start_next');
     $self->w->raw('</chapter>') if $self->{IN_CHAPTER};
     $self->w->raw('<chapter>') &&  $self->{IN_CHAPTER}++;
     $self->w->raw('<title>')->print($node->childs->[0]->childs->[0])

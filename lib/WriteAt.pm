@@ -296,6 +296,101 @@ sub rus2lat($) {
     $z;
 }
 
+=head2 get_time_stamp_from_string <str>
+
+Get time stamp from strnigs like this:
+
+        2012-11-27T09:39:19Z
+        2012-11-27 09:39:19
+        2012-11-27 09:39
+        2012-11-27 09
+        2012-11-27
+
+return unixtimestamp
+
+=cut
+
+sub get_time_stamp_from_string {
+    my $str  = shift || return;
+    use DateTime::Format::W3CDTF;
+    #if w3cdtf time
+    if ( $str =~ /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|.\d{2}:\d{2})/ ) {
+        my $dt = DateTime::Format::W3CDTF->new();
+        return $dt->parse_datetime($str)->epoch();
+    }
+    elsif ( $str =~
+        /^(\d{4})-(\d{2})-(\d{2})(?:.(\d{2})(?::(\d{2})(?::(\d{2}))?)?)?/ )
+    {
+        my $dt = DateTime->new(
+            year       => $1,
+            month      => $2,
+            day        => $3,
+            hour       => $4 || 0,
+            minute     => $5 || 0,
+            second     => $6 || 0,
+            nanosecond => 500000000,
+        );
+        return $dt->epoch;
+    }
+    die "Bad srting $str";
+}
+
+=head2 unixtime_to_string timestamp
+
+Return 
+
+=cut
+
+sub unixtime_to_string {
+    my $time = shift || return;
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime($time);
+    $year += 1900;
+    return sprintf( "%04d-%02d-%02dT%02d:%02d:%02dZ",
+        $year, $mon + 1, $mday, $hour, $min, $sec );
+}
+
+sub filter_published {
+    my $tree  = shift;
+    my $ctx   = shift || return;
+    unless (ref($ctx)) {
+         $ctx = new WriteAt::UtilCTX:: (filter_time=>&get_time_stamp_from_string($ctx))
+    }
+    my @nodes = ref($tree) eq 'ARRAY' ? @$tree : ($tree);
+    my @tree  = ();
+    foreach my $n (@nodes) {
+        unless ( ref($n) ) {    #skip text
+            push @tree, $n;
+            next;
+        }
+     if ($n->name eq 'pod' ) {
+        push @tree, $n;
+        $n->childs( &filter_published( $n->childs, $ctx ) );
+        next;
+     }
+    # handle publish attr
+    my $pub_time = 
+        &get_time_stamp_from_string( $n->get_attr->{published} ) 
+        || $ctx->get_current_level_time() 
+        || next; #if publish time empty skipit
+    my $name = $n->name;
+    #prcess head levels
+    if ( $name eq 'head' ) {
+        $ctx->switch_head_level(  $n->{level}, $pub_time );
+    } elsif ( $name eq uc($name)) {
+        $pub_time =  &get_time_stamp_from_string( $n->get_attr->{published} );
+        $ctx->switch_head_level(  0, $pub_time || 0);
+        next unless $pub_time;
+    }
+    my $filter_time = $ctx->get_filter_time;
+    #skip node
+    next if ( $pub_time > $filter_time );
+    push @tree, $n;
+    $n->childs( &filter_published( $n->childs, $ctx ) );
+    }
+    \@tree;
+}
+
+
 =head1 METHODS
 
 =cut
@@ -305,6 +400,45 @@ sub new {
     bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
 }
 
+1;
+package WriteAt::UtilCTX;
+use strict;
+use warnings;
+sub new {
+    my $class = shift;
+    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
+    #init head levels
+    $self->{HEAD_LEVELS} = 0;
+    $self->{stack} = [];
+    $self;
+}
+
+sub get_filter_time {
+    my $self = shift;
+    return $self->{filter_time}
+}
+sub get_current_level_time {
+    my $self = shift;
+    return $self->{stack}->[-1]
+}
+sub switch_head_level {
+    my $self = shift;
+    my $level = shift;
+    my $pub_time = shift;
+    my $prev = $self->{HEAD_LEVELS};
+    my $time_stack = $self->{stack};
+   if (defined($level) && $level == $prev ) {
+        $time_stack->[$level] = $pub_time;
+    } elsif ( $prev < $level  ) {
+        push @{$time_stack}, $pub_time for ( 1..$level-$prev);
+    } else #$prev > $level
+     { 
+        pop @{$time_stack} for ( 1..$prev-$level);
+        $time_stack->[$level] = $pub_time if defined($pub_time);
+     }
+     $self->{HEAD_LEVELS} = $level;
+    return $prev
+}
 1;
 __END__
 

@@ -4,36 +4,12 @@
 #
 #       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
 #===============================================================================
-#$Id$
-package CTX;
-sub new {
-    my $class = shift;
-    my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );
-    #init head levels
-    $self->{HEAD_LEVELS} = 0;
-    $self->{stack} = [];
-    $self;
-}
-
-sub get_filter_time {
-    my $self = shift;
-    return $self->{filter_time}
-}
-sub get_parent_time {
-    my $self = shift;
-    return $self->{stack}->[-1]
-}
-sub switch_head_level {
-    my $self = shift;
-    my $n = shift;
-    my $level = shift;
-}
 
 package main;
 use strict;
 use warnings;
-#use Test::More tests => 1;                      # last test to print
-use Test::More 'no_plan';                      # last test to print
+use Test::More tests => 14;                      # last test to print
+#use Test::More 'no_plan';                      # last test to print
 
 use Data::Dumper;
 use WriteAt;
@@ -48,88 +24,58 @@ test
 =head2 test
 
 yes
+
+=for head2 :published<'2013-11-27T09:35:00Z'>
+
+Test
+
 =end pod
 T
 
-=head2 get_time_stamp_from_string <str>
-
-Get time stamp from strnigs like this:
-
-        2012-11-27T09:39:19Z
-        2012-11-27 09:39:19
-        2012-11-27 09:39
-        2012-11-27 09
-        2012-11-27
-
-return unixtimestamp
-
-=cut
-
-sub get_time_stamp_from_string {
-    my $str  = shift || return;
-    use DateTime::Format::W3CDTF;
-    #if w3cdtf time
-    if ( $str =~ /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|.\d{2}:\d{2})/ ) {
-        my $dt = DateTime::Format::W3CDTF->new();
-        return $dt->parse_datetime($str)->epoch();
-    }
-    elsif ( $str =~
-        /^(\d{4})-(\d{2})-(\d{2})(?:.(\d{2})(?::(\d{2})(?::(\d{2}))?)?)?/ )
-    {
-        my $dt = DateTime->new(
-            year       => $1,
-            month      => $2,
-            day        => $3,
-            hour       => $4 || 0,
-            minute     => $5 || 0,
-            second     => $6 || 0,
-            nanosecond => 500000000,
-        );
-        return $dt->epoch;
-    }
-    die "Bad srting $str";
-}
-
-sub filter_published {
-    my $tree  = shift;
-    my $ctx   = shift || return;
-    my @nodes = ref($tree) eq 'ARRAY' ? @$tree : ($tree);
-    my @tree  = ();
-    foreach my $n (@nodes) {
-        unless ( ref($n) ) {    #skip text
-            push @tree, $n;
-            next;
-        }
-     if ($n->name eq 'pod' ) {
-        push @tree, $n;
-        $n->childs( &filter_published( $n->childs, $ctx ) );
-        next;
-     }
-    # handle publish attr
-    my $pub_time = 
-        &get_time_stamp_from_string( $n->get_attr->{published} ) 
-        || $ctx->get_parent_time() 
-        || next; #if publish time empty skipit
-
-    my $name = $n->name;
-    #prcess head levels
-    if ( $name eq 'head' ) {
-        $ctx->switch_head_level( $n, $n->level, $pub_time );
-    }
-    my $filter_time = $ctx->get_filter_time;
-    #skip node
-    next if ( $pub_time > $filter_time );
-    push @tree, $n;
-    $n->childs( &filter_published( $n->childs, $ctx ) );
-    }
-    \@tree;
-}
 
 
-my $tree = Perl6::Pod::Utl::parse_pod( $t, default_pod =>0 )
+#test Writeat::UtilCTX
+my $c = new WriteAt::UtilCTX:: (filter_time=>&WriteAt::get_time_stamp_from_string('2012-11-27T09:40:19Z'));
+ $c->switch_head_level( 0, 4);
+ is $c->get_current_level_time(), 4, 'level time for =h1';
+ is $c->switch_head_level( 1, 5),0, '0->1 level';
+ is $c->get_current_level_time(), 5, 'level time for =h2';
+ is $c->switch_head_level( 0),1, '1->0 level';
+ is $c->get_current_level_time(), 4, 'level time for =h1';
+ is $c->switch_head_level( 1, 7),0, '0->1 level';
+ is $c->switch_head_level( 2, 6 ),1, '1->2 level';
+
+ is $c->switch_head_level( 1, 8 ),2, '2->1 level';
+ is $c->get_current_level_time(), 8, 'level time for =h1';
+
+ my $tree = Perl6::Pod::Utl::parse_pod( $t, default_pod =>0 )
   || die "Can't parse ";
-my %res = ();
-#$tree = &WriteAt::get_book_info_blocks( $tree, \%res );
-$tree = &filter_published($tree, new CTX:: (filter_time=>&get_time_stamp_from_string('2012-11-27T09:38:19Z')));
-#print Dumper $tree;
+ $tree = &WriteAt::filter_published($tree,'2013-10-27T09:40:19Z' );
+ is scalar(@{ $tree->[0]->{content} }), 4, 'filter =head2';
+my $t2 = <<TXT;
+=CHAPTER Test chapter
+=for head1 :published<'2013-04-27T09:35:00Z'>
+Test name
+
+test
+=head2 test
+
+yes
+
+=for head1 :published<'2013-04-28T09:35:00Z'>
+
+Test
+
+TXT
+ my $tree2 = Perl6::Pod::Utl::parse_pod( $t2, default_pod =>1 )
+  || die "Can't parse ";
+
+ my $t21 = &WriteAt::filter_published($tree2,'2010-04-28T09:30:00Z' );
+ is scalar(@{$t21}), 0, "empty"; 
+
+ my $t22 = &WriteAt::filter_published($tree2,'2013-04-27T09:35:01Z' );
+ is scalar(@$t22),4, 'head1+para';
+
+ my $t23 = &WriteAt::filter_published($tree2,'2015-04-26T09:35:01Z' );
+ is scalar(@$t23),6, 'head1+head1+para';
 

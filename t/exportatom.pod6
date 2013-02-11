@@ -12,7 +12,8 @@ Dec 09th 2012(v0.1)[zag]   Start
 Test chapter
 
 Ok 
-=head1 Test name
+=for head1 :published<'2013-01-10T09:09:09Z'> 
+Test name
 =head2 test
 
 yes

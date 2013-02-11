@@ -19,16 +19,18 @@ use constant {
       }
 
 };
-my ( $help, $man, $render_class );
-my ( $type, $lang ) = ( "docbook", 'en' );
+my ( $help, $man, $render_class, $set_date );
+my ( $type, $lang, $enable_published ) = ( "docbook", 'en', 0 );
 my %opt = (
     help   => \$help,
     man    => \$man,
     type   => \$type,
     lang   => \$lang,
-    render => \$render_class
+    render => \$render_class,
+    enable_published=>\$enable_published,
+    set_date =>\$set_date
 );
-GetOptions( \%opt, 'help|?', 'man', 'c=s', "type|t:s", 'lang=s', 'render|r:s' )
+GetOptions( \%opt, 'help|?', 'man', 'set_date=s','enable_published','c=s', "type|t:s", 'lang=s', 'render|r:s' )
   or pod2usage(2);
 pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
@@ -111,7 +113,11 @@ unless ($type) {
 
     my %res;
     $tree = &WriteAt::get_book_info_blocks( $tree, \%res, $r );
-
+    #now filter by publush time if endable
+    if ($enable_published) {
+        my $pub_time = $set_date || &WriteAt::unixtime_to_string(time());
+        $tree = &WriteAt::filter_published($tree, $pub_time);
+    }
     $r->start_write(%res);
 
     if ( $type eq 'docbook' ) {
@@ -166,15 +172,14 @@ or
     -type  - output format (docbook, latex, atom)
     -render,-r - use class for render (option -type ignored)
     -lang  - set language ( default: en )
+    -enable_publish - filter :publish attributes (default: off)
+    -set_date '2012-11-27T09:39:18Z' - set time to filter published (default: now)
 
     [file] : filename or - for STDIN
 
     [render options]:
      atom:
             -baseurl http://example.org  - base url for links
-            -default_publish 1 - publish items without 'published' attr
-                                 default: 0.
-            -set_date '2012-11-27T09:39:18Z' - set time to filter published
 
       atom example:
 
