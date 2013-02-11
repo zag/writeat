@@ -1,5 +1,7 @@
 Revision history for Perl extension WriteAt.
 
+0.04
+    + add support :published, :updated flags for Atom
 0.03
     + convert books to atom feed
     + add latex support

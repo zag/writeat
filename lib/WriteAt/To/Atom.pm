@@ -38,7 +38,7 @@ use utf8;
 sub new {
     my $class = shift;
     my $self =
-      $class->SUPER::new( baseurl => 'http://example.com', lang => 'en', @_ );
+      $class->SUPER::new( baseurl => 'http://example.com', lang => 'en', as_entry=>'CHAPTER', @_ );
     return $self;
 }
 
@@ -144,7 +144,18 @@ TXT
 sub write {
     my $self = shift;
     my $tree = shift;
-    my $res  = &WriteAt::make_levels( "CHAPTER", 0, $tree );
+    my $res ;
+    if ($self->{as_entry} eq 'CHAPTER')  {
+           $res  =  &WriteAt::make_levels( "CHAPTER", 0, $tree ) ;
+           warn "CHAPTER";
+    } else {
+      #headN
+        $self->{as_entry} =~ /(\d+)$/ || die "use in as_entry: head1, head2 ...";
+        $res  =  &WriteAt::make_levels( "head", $1, $tree ) ;
+#        use Data::Dumper;
+#        print  Dumper $res;
+          warn "head1";
+    }
     my $w    = $self->writer;
 
     #first setup published attr for items
@@ -158,20 +169,11 @@ sub write {
     foreach my $entry (@$res) {
         $entry->{order} = ++$order;    #for sort in later
         my $published = $entry->{node}->get_attr->{published};
-        unless ($published) {
-
-            #skip enties without published attr
-            next unless $self->{default_published};
-        }
-
         #set default publushed = current time
         my $published_time =
             $published
           ? $self->get_time_stamp_from_string($published)
           : $current_time;
-
-        #skip entry in future
-        next if $published_time > $current_time;
 
         #save publish timesamp for sorting later
         $entry->{pub_time} = $published_time;
@@ -186,7 +188,7 @@ sub write {
 
         # check if need filter by published
         my $published = $entry->{node}->get_attr->{published};
-        my $updated   = $self->unixtime_to_string($current_time);
+        my $updated   = $entry->{node}->get_attr->{updated} || $published || $self->unixtime_to_string($current_time);
         $published ||= $updated;
         my $title    = &WriteAt::get_text( $entry->{node} );
         my $title_en = &WriteAt::rus2lat($title);

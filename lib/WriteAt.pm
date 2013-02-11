@@ -71,7 +71,7 @@ Point your web brouser to C<index.html> file in C<work> directory.
 use strict;
 use warnings;
 use v5.10;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use WriteAt::CHANGES;
 use WriteAt::AUTHOR;
 use WriteAt::To::DocBook;
@@ -236,7 +236,9 @@ sub get_text {
     my @nodes = @_;
     my $txt   = '';
     foreach my $n (@nodes) {
-        if ( $n->{type} eq 'text' ) {
+        unless ( ref($n) ) {
+            $txt .= $n
+        } elsif ( $n->{type} eq 'text' ) {
             $txt .= join "" => @{ $n->childs };
         }
         else {

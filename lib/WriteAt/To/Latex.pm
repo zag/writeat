@@ -15,6 +15,7 @@ use utf8;
 
 sub start_write {
     my $self = shift;
+    my %tags = @_;
     $self->w->raw(<<'START');
 \documentclass[a4paper,12pt,twoside]{report} %размер бумаги устанавливаем А4, шрифт 12пунктов
 \usepackage[T2A]{fontenc}
@@ -48,6 +49,13 @@ sub start_write {
 
 \begin{document}
 START
+
+        $self->title_page(%tags);
+        $self->w->raw(
+'\tableofcontents{} % auto toc
+\newpage'
+        );
+
 }
 
 sub end_write {

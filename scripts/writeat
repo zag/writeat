@@ -119,36 +119,8 @@ unless ($type) {
         $tree = &WriteAt::filter_published($tree, $pub_time);
     }
     $r->start_write(%res);
-
-    if ( $type eq 'docbook' ) {
-        $r->w->raw('<bookinfo>');
-        for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
-            my $n = $res{$_} || die "Cant find block =$_";
-
-            #make Document element
-            $r->visit($n);
-        }
-        $r->w->raw('</bookinfo>');
-    }
-    elsif ( $type eq 'latex' ) {
-
-        $r->title_page(%res);
-        $r->w->raw(
-'\tableofcontents{} % auto toc
-\newpage'
-        );
-
-        #    for (qw/ TITLE SUBTITLE AUTHOR CHANGES DESCRIPTION /) {
-        #        my $n = $res{$_} || die "Cant find block =$_";
-        #
-        #        #make Document element
-        #        $r->visit($n);
-        #    }
-    }
-
     $r->write($tree);
     $r->end_write();
-
 }
 
 exit 0;
@@ -172,21 +144,23 @@ or
     -type  - output format (docbook, latex, atom)
     -render,-r - use class for render (option -type ignored)
     -lang  - set language ( default: en )
-    -enable_publish - filter :publish attributes (default: off)
+    -enable_published - filter :publish attributes (default: off)
     -set_date '2012-11-27T09:39:18Z' - set time to filter published (default: now)
 
     [file] : filename or - for STDIN
 
     [render options]:
      atom:
-            -baseurl http://example.org  - base url for links
+         -baseurl http://example.org  - base url for links
+         -as_entry head1               - use head1 for atom entry (default =CHAPTER)
 
       atom example:
 
-    writeat -t atom -lang en - \
-        -- -baseurl http://example.org \
-        -default_publish 0 \
-        -set_date '2012-11-27T09:39:18Z' < exportatom.pod6
+    writeat -t atom -lang en \
+        -enable_published \
+        -set_date '2012-11-27T09:39:18Z' \
+        - \
+        -- -level head1 -baseurl http://example.org  < exportatom.pod6
 
 
 =head1 OPTIONS
@@ -221,7 +195,7 @@ Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2012 by Zahatski Aliaksandr
+Copyright 2013 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

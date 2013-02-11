@@ -8,11 +8,11 @@ Dec 09th 2012(v0.1)[zag]   Start
 
 =end CHANGES
 =AUTHOR Alex Zahatski
-=for CHAPTER :published<'2012-11-27T09:39:19Z'>
+=for CHAPTER :published<'2012-11-27T09:39:19Z'> 
 Test chapter
 
 Ok 
-=for head1 :published<'2013-01-10T09:09:09Z'> 
+=for head1 :published<'2013-01-10T09:09:09Z'> :updated<'2013-02-27T10:30:01Z'>
 Test name
 =head2 test
 

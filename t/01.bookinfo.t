@@ -107,7 +107,7 @@ $atom->start_write(%res2);
 $atom->write($tree2);
 $atom->end_write();
 close $fd;
-is scalar( @{ [ $out =~ /(<\/entry>)/gs ] } ), 1, 'default_published';
+is scalar( @{ [ $out =~ /(<\/entry>)/gs ] } ), 2, 'default_published';
 #test DESCRIPTION :tag
 ok $out =~ m%<category>pod6</category>%, '=for DESCRITION :tag<pod6>';
 ok $out =~ m%<category>intro</category>%, '=for CHAPTER :tag<intro>';

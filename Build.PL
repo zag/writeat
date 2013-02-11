@@ -11,6 +11,7 @@ Module::Build->new
 	     },
     script_files=>[qw!
 	scripts/writeat
+	acripts/atom2file
     !],
    dist_version_from=>'lib/WriteAt.pm',
     meta_merge=>{
