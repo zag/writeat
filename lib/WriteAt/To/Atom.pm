@@ -201,7 +201,7 @@ sub write {
             # save TAGS as ref to array 
             my $local_tags = ref($tags) ? $tags : [$tags];
             #union tags fill categoty tags
-            foreach my $tag ( @{$local_tags}, @{ $self->{TAGS}|| [] } ) {
+            foreach my $tag (  @{ $self->{TAGS}|| [] }, @{$local_tags} ) {
                 $w->raw("<category>$tag</category>\n")
             }
         }
