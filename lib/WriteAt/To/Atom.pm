@@ -14,13 +14,7 @@ WriteAt::To::Atom - Atom renderer
         new WriteAt::To::Atom:: 
             lang=>'en', 
             baseurl=>'http://example.com',
-            #set date to filter items by 'published' attr
-            set_date=> '2012-07-20T09:00:00Z' 
-                      | '2012-07-20 09:00:00'
-                      | '2012-07-20',
-            #set all entries without 'published' attr
-            # to published anyway
-            default_published => 1
+            as_entry => 'CHAPTER',
 
 =cut
 
@@ -147,14 +141,10 @@ sub write {
     my $res ;
     if ($self->{as_entry} eq 'CHAPTER')  {
            $res  =  &WriteAt::make_levels( "CHAPTER", 0, $tree ) ;
-           warn "CHAPTER";
     } else {
       #headN
         $self->{as_entry} =~ /(\d+)$/ || die "use in as_entry: head1, head2 ...";
         $res  =  &WriteAt::make_levels( "head", $1, $tree ) ;
-#        use Data::Dumper;
-#        print  Dumper $res;
-          warn "head1";
     }
     my $w    = $self->writer;
 

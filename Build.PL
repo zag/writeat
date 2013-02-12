@@ -7,7 +7,8 @@ Module::Build->new
 	'Regexp::Grammars'=>1.021,
         'Perl6::Pod::Lib'=>0.11,
         'Perl6::Pod'=>0.57,
-        'DateTime::Format::W3CDTF'=>0
+        'DateTime::Format::W3CDTF'=>0,
+	'Template'=>2.24
 	     },
     script_files=>[qw!
 	scripts/writeat
