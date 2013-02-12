@@ -20,10 +20,15 @@ pod2usage(1) if $help;
 pod2usage( -exitstatus => 0, -verbose => 2 ) if $man;
 
 unless ($template) {
-    pod2usage( -exitstatus => 2, -message => 'Need -template [file]!' );
-}
-unless ( -e $template ) {
+#    pod2usage( -exitstatus => 2, -message => 'Need -template [file]!' );
+      { local $/ = undef;
+      $template = <DATA>
+      }
+     $template = \"$template";
+} else {
+    unless ( -e $template ) {
     pod2usage( -exitstatus => 2, -message => "Not exists template: $template" );
+    }
 }
 
 {
@@ -83,15 +88,15 @@ my @nodes  = ();
     $source,
     sub {
         my %record = @_;
-        push @nodes, \%record;
+        unshift @nodes, \%record;
     }
 );
 
-# setup next and previus keys
-my $size = reverse @nodes;
+# setup next and previus keys   
+my $size = scalar(@nodes);
 for ( my $i = 0 ; $i < $size ; $i++ ) {
     my $n = $nodes[$i];
-    $n->{prev} = $nodes[$i] if $i;
+    $n->{prev} = $nodes[$i-1] if $i;
     $n->{next} = $nodes[ $i + 1 ] if $i < ( $size - 1 );
 }
 
@@ -107,7 +112,7 @@ foreach my $node (@nodes) {
     if ( $link =~ /(.+)\/([^\/]+)$/ ) {
         ( $path, $file_name ) = ( $1, $2 );
     }
-    my $file_path = ( $prefix || '' ) . "/" . $path;
+    my $file_path = ( $prefix || '.' ) . "/" . $path;
 
     #make path
     use File::Path;
@@ -118,10 +123,20 @@ foreach my $node (@nodes) {
     #process input template, substituting variables
     $tt->process( $template, $node, "$file_path/$file_name" )
       || die $tt->error();
-
+    #$tt->process( $template, $node, "$file_path/index.html" )
+    #  || die $tt->error();
 }
 
-#stop
+ if (1 and scalar(@nodes )) {
+    #make index page
+    use Template;
+    my $tt = Template->new( { INTERPOLATE => 0, ABSOLUTE => 1 } );
+
+    #process input template, substituting variables
+    $tt->process( $template, $nodes[-1], ( $prefix || '.' ) . "/index.htm" )
+      || die $tt->error();
+ }
+
 
 1;
 
@@ -153,6 +168,11 @@ Template call with the following keys for each atom entry:
                         'type' => 'text/html',
                         'title' => 'Test chapter'
                       },
+            'category' => [
+                        'perl',
+                        'install',
+                        'linux'
+                        ],
             'content' => 'HTML text',
             'updated' => '2012-12-17T13:29:08Z',
             'id' => 'http://example.com;Test chapter',
@@ -184,6 +204,10 @@ Prints manual page and exit
 
     atom2file -template contrib/template.tmpl -prefix /tmp < atom.xml
 
+
+    writeat -t atom - -- -baseurl "." -as_entry head1< test.pod6 >test.atom
+    atom2file  -prefix 1 < test.atom
+
 =head1 AUTHOR
 
 Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
@@ -196,4 +220,107 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
+__DATA__
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>[%title%]</title>
+    <!-- Global Stylesheets -->
+    <link rel="stylesheet" href="http://www.angrycreative.se/wp-content/themes/angry-less/reset.css" media="all" />
+    <link rel="stylesheet" href="http://www.angrycreative.se/wp-content/themes/angry-less/fonts.css" media="all" />
+    <link rel="stylesheet" href="http://www.angrycreative.se/wp-content/themes/angry-less/style.css" media="all" />
+    <style type="text/css">
+
+div.navig {
+ float:right;
+ line-height:1.2; 
+}
+
+ul.prevnext { float:right;list-style:none;margin:0;padding:0; }
+.prevnext li { display:inline }
+.prevnext li>*, .prevnext li abbr {
+  color:#666;
+}
+.prevnext li>* {
+  line-height:1.2;
+  text-align:center;
+  float:left; 
+  width:5.5em; 
+  height:4.7em;
+  padding:1.8em .5em 0;
+  margin-right:.3em;
+  border:.1em solid #fff;
+  cursor:default;
+  background:#eee;
+}
+.prevnext li a { 
+  width:4.4em;
+  height:1.5em;
+  line-height:2.5em;
+  padding:2em 0.1em 3em 0;
+  color:#333;
+  background:#d5d5d5;
+  border-radius:1em; -moz-border-radius:1em; -webkit-border-radius:1em; 
+  border: .1em solid #CCC;
+  cursor: pointer;
+}
+.prevnext li:first-child a { padding: 2em 0 3em 0.1em; }
+.prevnext li abbr {
+  font-size:5em; font-family:Courier New,monospace;
+}
+.prevnext a:hover,.prevnext a.active {
+  background: #aaa;
+  text-decoration:none;
+}
+
+:link, :visited, ins {
+text-decoration: none;
+}
+.prevnext a:hover abbr,.prevnext a.active abbr {
+  color:#333;
+}
+.post-content {
+    margin-top: 1em;
+}
+.post-content p {
+    text-indent: 1em;
+text-align: justify;
+}
+.post-content h1, .post-content h2, .post-content h3 {
+clear: both;
+margin-top: 0.5em;
+}
+    
+    </style>
+  </head>
+
+  <body>
+
+  <div class="navig">
+    <ul class="prevnext">
+        <li>
+        [% IF prev %]
+        <a href="[%prev.link.href%]" id="previtem" title="[%prev.link.title%]" rel="prev"><abbr title="Previous">&#x2190;</abbr></a> 
+        [% ELSE %]
+        <span>No older items</span>
+        [% END %]
+        </li>
+        <li>
+        [% IF next %]
+        <a href="[%next.link.href%]" id="nextitem" title="[%next.link.title%]" rel="next"><abbr title="Next">&#x2192;</abbr></a>
+        [% ELSE %]
+        <span>No new items</span>
+        [% END%]
+        </li>
+   </ul>
+  </div>
+  <div style="width: 30em;margin: 1em auto;">
+      <!-- page content -->
+      <h1>[%title%]</h1>
+      <div  class="post-content" >[%content%]</div>
+      <div><p style="color: #444;font-size: 0.9em; margin-top:1em;">[%published%]</p></div>
+  </div>
+  </body>
+</html>
 

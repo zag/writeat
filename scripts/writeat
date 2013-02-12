@@ -131,6 +131,29 @@ exit 0;
 
 =head1 SYNOPSIS
 
+Minimal book template is:
+
+    =begin pod
+    =TITLE Main title
+    =SUBTITLE mini subtitle
+    =for DESCRIPTION tag:<tag1 tag2>
+    asd asd 
+    =begin CHANGES
+    Dec 09th 2012(v0.1)[zag]   Start
+    =end CHANGES
+    =AUTHOR Alex Zahatski
+    =for CHAPTER
+    Test chapter
+    =for head1 :published<'2013-01-10T09:09:09Z'> :updated<'2013-02-27T10:30:01Z'>
+    = :tag<setup>
+    Begining
+    =head2 Second level
+    
+    The following text ...
+    =end pod
+
+
+
   writeat -type docbook  file.pod6 > file.xml
  
 or
@@ -142,7 +165,7 @@ or
     -help  - print help message
     -man   - print man page
     -type  - output format (docbook, latex, atom)
-    -render,-r - use class for render (option -type ignored)
+    -render,-r - use class for render (option -type ignored) (default: off)
     -lang  - set language ( default: en )
     -enable_published - filter :publish attributes (default: off)
     -set_date '2012-11-27T09:39:18Z' - set time to filter published (default: now)
@@ -186,6 +209,27 @@ use class for render (C<-type> ignored)
     writeat  - process pod6 files
 
 =head1 EXAMPLE
+
+Minimal book template is:
+
+    =begin pod
+    =TITLE Main title
+    =SUBTITLE mini subtitle
+    =for DESCRIPTION tag:<tag1 tag2>
+    asd asd 
+    =begin CHANGES
+    Dec 09th 2012(v0.1)[zag]   Start
+    =end CHANGES
+    =AUTHOR Alex Zahatski
+    =for CHAPTER
+    Test chapter
+    =for head1 :published<'2013-01-10T09:09:09Z'> :updated<'2013-02-27T10:30:01Z'>
+    = :tag<setup>
+    Begining
+    =head2 Second level
+    
+    The following text ...
+    =end pod
 
    writeat -type docbook < book.pod6
 
