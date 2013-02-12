@@ -45,15 +45,25 @@ unless ( -e $template ) {
 sub parse_feed {
     my ( $data, $sub_ref ) = @_;
     my $rd   = new XML::Flow:: $data;
+    my @category_tmp=();
     my %tags = (
         entry => sub {
             shift;
+	    my @category = @category_tmp;
+	    @category_tmp = ();
+	    my %uniq;
+	    push @_, category=>[ grep {! $uniq{$_}++ } @category];
             if   ($sub_ref) { $sub_ref->(@_) }
             else            { print "Item:" . Dumper( {@_} ) }
         },
         'content' => sub {
             my $attr = shift;
             return content => join "", @_;
+        },
+        'category' => sub {
+            my $attr = shift;
+	    push @category_tmp, join "", @_;
+            return category => \@category_tmp
         },
         'link' => sub { my $attr = shift; return ( 'link' => $attr ) },
         '*' => sub {
