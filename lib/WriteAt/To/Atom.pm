@@ -187,7 +187,7 @@ sub write {
         $title_en =~ s/\s+/-/g;
         my $filename = $title_en . ".htm";
         my $url      = $self->{baseurl} . "/" . $filename;
-        my $id       = $self->{baseurl} . ";" . $title;
+        my $id       = $self->{baseurl} . ";" . $title_en;
         $w->raw(
             qq%<entry xmlns="http://www.w3.org/2005/Atom">
                 <title>$title</title>
