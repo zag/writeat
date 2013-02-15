@@ -1,5 +1,6 @@
 Revision history for Perl extension WriteAt.
-
+0.05 
+    + fix Build.PL
 0.04
     + add support :published, :updated flags for Atom
 0.03

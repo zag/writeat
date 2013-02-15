@@ -5,14 +5,14 @@ Module::Build->new
     license => 'perl',
    prereq => {
 	'Regexp::Grammars'=>1.021,
-        'Perl6::Pod::Lib'=>0.11,
+        'Perl6::Pod::Lib'=>0.12,
         'Perl6::Pod'=>0.57,
         'DateTime::Format::W3CDTF'=>0,
 	'Template'=>2.24
 	     },
     script_files=>[qw!
 	scripts/writeat
-	acripts/atom2file
+	scripts/atom2file
     !],
    dist_version_from=>'lib/WriteAt.pm',
     meta_merge=>{
