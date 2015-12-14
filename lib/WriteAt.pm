@@ -71,7 +71,7 @@ Point your web brouser to C<index.html> file in C<work> directory.
 use strict;
 use warnings;
 use v5.10;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 use WriteAt::CHANGES;
 use WriteAt::AUTHOR;
 use WriteAt::To::DocBook;
@@ -406,6 +406,8 @@ sub new {
 package WriteAt::UtilCTX;
 use strict;
 use warnings;
+our $VERSION = '0.01';
+
 sub new {
     my $class = shift;
     my $self = bless( ( $#_ == 0 ) ? shift : {@_}, ref($class) || $class );

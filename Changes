@@ -1,4 +1,6 @@
 Revision history for Perl extension WriteAt.
+0.07 
+    + fix cpan's mod
 0.06 
     + fix deps
 0.05 
