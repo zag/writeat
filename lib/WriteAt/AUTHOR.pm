@@ -2,13 +2,14 @@
 #
 #  DESCRIPTION:  Author SECTION
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package WriteAt::AUTHOR;
 use strict;
 use warnings;
 use Perl6::Pod::Block;
 use base 'Perl6::Pod::Block';
+our $VERSION = '0.01';
 
 =pod
 

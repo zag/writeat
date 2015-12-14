@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION: WriteAt - suite for book writers
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package WriteAt;
 
@@ -71,7 +71,7 @@ Point your web brouser to C<index.html> file in C<work> directory.
 use strict;
 use warnings;
 use v5.10;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use WriteAt::CHANGES;
 use WriteAt::AUTHOR;
 use WriteAt::To::DocBook;
@@ -457,7 +457,7 @@ Zahatski Aliaksandr, <zag@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2012 by Zahatski Aliaksandr
+Copyright (C) 2012-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

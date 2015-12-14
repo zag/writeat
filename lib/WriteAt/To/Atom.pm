@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  convert pod6 to atom
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 
 =head1 NAME
@@ -28,6 +28,7 @@ use DateTime::Format::W3CDTF;
 use Perl6::Pod::To::XHTML;
 use base ( 'Perl6::Pod::To::XHTML', 'WriteAt::To' );
 use utf8;
+our $VERSION = '0.01';
 
 sub new {
     my $class = shift;

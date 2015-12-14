@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  export to latex
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package WriteAt::To::Latex;
 use strict;
@@ -12,6 +12,7 @@ use WriteAt::To;
 use Perl6::Pod::To::Latex;
 use base ( 'Perl6::Pod::To::Latex', 'WriteAt::To' );
 use utf8;
+our $VERSION = '0.01';
 
 sub start_write {
     my $self = shift;

@@ -4,9 +4,9 @@ Module::Build->new
     ( module_name => 'WriteAt',
     license => 'perl',
    prereq => {
-	'Regexp::Grammars'=>1.021,
-        'Perl6::Pod::Lib'=>0.12,
-        'Perl6::Pod'=>0.57,
+	'Regexp::Grammars'=>1.042,
+        'Perl6::Pod::Lib'=>0.13,
+        'Perl6::Pod'=>0.71,
         'DateTime::Format::W3CDTF'=>0,
 	'Template'=>2.24
 	     },

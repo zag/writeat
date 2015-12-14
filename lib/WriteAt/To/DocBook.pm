@@ -2,7 +2,7 @@
 #
 #  DESCRIPTION:  DocBook
 #
-#       AUTHOR:  Aliaksandr P. Zahatski, <zahatski@gmail.com>
+#       AUTHOR:  Aliaksandr P. Zahatski, <zag@cpan.org>
 #===============================================================================
 package WriteAt::To::DocBook;
 use strict;
@@ -11,6 +11,7 @@ use Perl6::Pod::Utl;
 use WriteAt::To;
 use base ( 'Perl6::Pod::To::DocBook', 'WriteAt::To' );
 use utf8;
+our $VERSION = '0.01';
 
 sub start_write {
     my $self = shift;

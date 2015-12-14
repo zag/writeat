@@ -235,11 +235,11 @@ Minimal book template is:
 
 =head1 AUTHOR
 
-Zahatski Aliaksandr, E<lt>zahatski@gmail.comE<gt>
+Zahatski Aliaksandr, E<lt>zag@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2013 by Zahatski Aliaksandr
+Copyright 2013-2015 by Zahatski Aliaksandr
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
